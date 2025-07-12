@@ -1,8 +1,10 @@
 <?php 
+include "app/db.php";
+session_start();
 
-$url = "app/login.php";
+$logged_in = false;
 if (isset($_SESSION["user_id"])) {
-    $url = "";
+    $logged_in = true;    
 }
 
 ?>
@@ -14,14 +16,16 @@ if (isset($_SESSION["user_id"])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skill Swap Platform</title>
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=Parkinsans:wght@300..800&display=swap');
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: "Parkinsans", sans-serif;
         }
 
         body {
-            font-family: 'Arial', sans-serif;
             background-color: #1a1a1a;
             color: #ffffff;
             line-height: 1.6;
@@ -240,10 +244,14 @@ if (isset($_SESSION["user_id"])) {
     </style>
 </head>
 <body>
+
     <div class="container">
         <header>
             <div class="logo">Skill Swap Platform</div>
-            <button class="login-btn" onclick="login()">Login</button>
+            
+            <?php if (!$logged_in) { ?>
+                <button class="login-btn" onclick="location.href='app/login.php'"> Login</button>
+            <?php } ?>
         </header>
 
         <div class="search-section">
@@ -257,81 +265,60 @@ if (isset($_SESSION["user_id"])) {
             <button class="search-btn" onclick="searchProfiles()">Search</button>
         </div>
 
-        <div class="profiles-grid" id="profilesGrid">
-            <div class="profile-card">
-                <div class="profile-photo">Profile Photo</div>
-                <div class="profile-info">
-                    <div class="profile-name">Marc Demo</div>
-                    <div class="skills-section">
-                        <div class="skills-label">Skills Offered →</div>
-                        <div class="skills-tags">
-                            <span class="skill-tag">Java Script</span>
-                            <span class="skill-tag">Python</span>
-                        </div>
-                    </div>
-                    <div class="skills-section">
-                        <div class="skills-label">Skill wanted →</div>
-                        <div class="skills-tags">
-                            <span class="skill-tag">Photoshop</span>
-                            <span class="skill-tag">Graphic design</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="profile-actions">
-                    <button class="request-btn" onclick="sendRequest('Marc Demo')">Request</button>
-                    <div class="rating">rating: 3.9/5</div>
-                </div>
-            </div>
+        <?php
 
-            <div class="profile-card">
-                <div class="profile-photo">Profile Photo</div>
-                <div class="profile-info">
-                    <div class="profile-name">Michell</div>
-                    <div class="skills-section">
-                        <div class="skills-label">Skills Offered →</div>
-                        <div class="skills-tags">
-                            <span class="skill-tag">Java Script</span>
-                            <span class="skill-tag">Python</span>
-                        </div>
-                    </div>
-                    <div class="skills-section">
-                        <div class="skills-label">Skill wanted →</div>
-                        <div class="skills-tags">
-                            <span class="skill-tag">Photoshop</span>
-                            <span class="skill-tag">Graphic design</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="profile-actions">
-                    <button class="request-btn" onclick="sendRequest('Michell')">Request</button>
-                    <div class="rating">rating: 2.5/5</div>
-                </div>
-            </div>
+            // Fetch only public profiles
+            $result = $conn->query("SELECT name, profile_pic, skills_offered, skills_wanted FROM users WHERE profile_visibility = 'public'");
 
-            <div class="profile-card">
-                <div class="profile-photo">Profile Photo</div>
-                <div class="profile-info">
-                    <div class="profile-name">Joe Wills</div>
-                    <div class="skills-section">
-                        <div class="skills-label">Skills Offered →</div>
-                        <div class="skills-tags">
-                            <span class="skill-tag">Java Script</span>
-                            <span class="skill-tag">Python</span>
-                        </div>
-                    </div>
-                    <div class="skills-section">
-                        <div class="skills-label">Skill wanted →</div>
-                        <div class="skills-tags">
-                            <span class="skill-tag">Photoshop</span>
-                            <span class="skill-tag">Graphic design</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="profile-actions">
-                    <button class="request-btn" onclick="sendRequest('Joe Wills')">Request</button>
-                    <div class="rating">rating: 4.0/5</div>
-                </div>
-            </div>
-        </div>
+            echo '<div class="profiles-grid" id="profilesGrid">';
+
+            while ($row = $result->fetch_assoc()) {
+                $name = htmlspecialchars($row['name']);
+                $pic = $row['profile_pic'] ? htmlspecialchars($row['profile_pic']) : 'https://via.placeholder.com/100?text=User';
+                
+                $offered = array_filter(array_map('trim', explode(',', $row['skills_offered'])));
+                $wanted = array_filter(array_map('trim', explode(',', $row['skills_wanted'])));
+
+                // Random rating for now
+                $rating = number_format(rand(25, 50) / 10, 1);
+                
+                echo '<div class="profile-card">';
+                echo    '<div class="profile-photo"><img src="' . $pic . '" alt="' . $name . '" style="width:100%; border-radius: 8px;"></div>';
+                echo    '<div class="profile-info">';
+                echo        '<div class="profile-name">' . $name . '</div>';
+
+                // Skills Offered
+                echo '<div class="skills-section">';
+                echo     '<div class="skills-label">Skills Offered →</div>';
+                echo     '<div class="skills-tags">';
+                foreach ($offered as $skill) {
+                    echo '<span class="skill-tag">' . htmlspecialchars($skill) . '</span>';
+                }
+                echo     '</div>';
+                echo '</div>';
+
+                // Skills Wanted
+                echo '<div class="skills-section">';
+                echo     '<div class="skills-label">Skills Wanted →</div>';
+                echo     '<div class="skills-tags">';
+                foreach ($wanted as $skill) {
+                    echo '<span class="skill-tag">' . htmlspecialchars($skill) . '</span>';
+                }
+                echo     '</div>';
+                echo '</div>';
+
+                echo    '</div>'; // .profile-info
+
+                echo    '<div class="profile-actions">';
+                echo        '<button class="request-btn" onclick="sendRequest(\'' . $name . '\')">Request</button>';
+                echo        '<div class="rating">rating: ' . $rating . '/5</div>';
+                echo    '</div>';
+                echo '</div>';
+            }
+
+            echo '</div>';
+        ?>
+
+    </div>
 </body>
 </html>

@@ -15,14 +15,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $pic = '';
   if ($_FILES["profile_pic"]["error"] == 0) {
       $filename = uniqid() . "-" . basename($_FILES["profile_pic"]["name"]);
-      $target = "uploads/" . $filename;
-      move_uploaded_file($_FILES["profile_pic"]["tmp_name"], $target);
-      $pic = $target;
+      $target = "../uploads/" . $filename; // filesystem path
+      if (move_uploaded_file($_FILES["profile_pic"]["tmp_name"], $target)) {
+          $pic = "uploads/" . $filename; // relative public path for <img src="">
+      }
   }
 
   $stmt = $conn->prepare("INSERT INTO users (name, email, password, profile_pic, skills_offered, skills_wanted, availability, location, profile_visibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
   $stmt->bind_param("sssssssss", $name, $email, $password, $pic, $skills_offered, $skills_wanted, $availability, $location, $visibility);
   $stmt->execute();
+    
+  $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+  $stmt->bind_param("s", $email);
+  $stmt->execute();
+  $stmt->bind_result($user_id);
+  if ($stmt->fetch()) {
+      $_SESSION['user_id'] = $user_id;
+  }
 
   echo "<script>alert('Signup successful!'); window.location='../index.php';</script>";
 }

@@ -20,6 +20,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             exit();
         }
     }
+
+    $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $stmt->bind_result($user_id);
+    if ($stmt->fetch()) {
+        $_SESSION['user_id'] = $user_id;
+    }
+
     echo "<script>alert('Invalid email or password');</script>";
 }
 
