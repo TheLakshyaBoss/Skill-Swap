@@ -1,3 +1,46 @@
+<?php
+session_start();
+include "db.php";
+
+$id = $_GET["id"];
+$stmt = $conn->prepare("SELECT name, profile_pic, skills_offered, skills_wanted FROM users WHERE id = ?");
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($row = $result->fetch_assoc()) {
+    $name = htmlspecialchars($row['name']);
+    $profile_pic = "../" . $row['profile_pic'] ?: "https://via.placeholder.com/120?text=User";
+    
+    $skills_offered = array_filter(array_map('trim', explode(",", $row['skills_offered'])));
+    $skills_wanted = array_filter(array_map('trim', explode(",", $row['skills_wanted'])));
+}
+
+// Getting current user's offered skills
+if (isset($_SESSION['user_id'])) {
+
+    $user_id = $_SESSION['user_id'];
+    $stmt = $conn->prepare("SELECT skills_offered FROM users WHERE id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($row = $result->fetch_assoc()) {
+        $my_skills = array_filter(array_map('trim', explode(',', $row['skills_offered'])));
+    }
+    $stmt->close();
+}
+
+// Getting skills_wanted of the user offering
+$stmt = $conn->prepare("SELECT skills_wanted FROM users WHERE id = ?");
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($row = $result->fetch_assoc()) {
+    $their_skills = array_filter(array_map('trim', explode(',', $row['skills_wanted'])));
+}
+$stmt->close();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -147,8 +190,8 @@
         }
 
         .profile-photo {
-            width: 150px;
-            height: 150px;
+            width: 200px;
+            height: 200px;
             border-radius: 50%;
             border: 3px solid #475569;
             background: linear-gradient(45deg, #1e293b, #334155);
@@ -330,8 +373,6 @@
                 transform: scale(1) translateY(0);
             }
         }
-
-        /* Responsive Design */
         @media (max-width: 768px) {
             .main-content {
                 flex-direction: column;
@@ -356,7 +397,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <div class="header">
             <div class="logo">Skill Swap Platform</div>
             <div class="nav-buttons">
@@ -366,47 +406,48 @@
             </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- User Card -->
-            <div class="user-card">
-                <h2 class="user-name">Marc Demo</h2>
-                
-                <div class="skills-section">
-                    <h3 class="skills-title">Skills Offered</h3>
-                    <div class="skills-list">
-                        <span style="display: inline-block; background: rgba(96, 165, 250, 0.2); color: #60a5fa; padding: 4px 12px; border-radius: 20px; margin: 2px; font-size: 14px;">JavaScript</span>
-                        <span style="display: inline-block; background: rgba(96, 165, 250, 0.2); color: #60a5fa; padding: 4px 12px; border-radius: 20px; margin: 2px; font-size: 14px;">React</span>
-                        <span style="display: inline-block; background: rgba(96, 165, 250, 0.2); color: #60a5fa; padding: 4px 12px; border-radius: 20px; margin: 2px; font-size: 14px;">Node.js</span>
-                        <span style="display: inline-block; background: rgba(96, 165, 250, 0.2); color: #60a5fa; padding: 4px 12px; border-radius: 20px; margin: 2px; font-size: 14px;">Python</span>
-                    </div>
-                </div>
-                
-                <div class="skills-section">
-                    <h3 class="skills-title">Skills Wanted</h3>
-                    <div class="skills-list">
-                        <span style="display: inline-block; background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 4px 12px; border-radius: 20px; margin: 2px; font-size: 14px;">UI/UX Design</span>
-                        <span style="display: inline-block; background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 4px 12px; border-radius: 20px; margin: 2px; font-size: 14px;">Adobe Photoshop</span>
-                        <span style="display: inline-block; background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 4px 12px; border-radius: 20px; margin: 2px; font-size: 14px;">Figma</span>
-                    </div>
-                </div>
-                
-                <div class="rating-section">
-                    <h3 class="rating-title">Rating and Feedback</h3>
-                    <div style="font-size: 24px; margin: 10px 0;">⭐⭐⭐⭐⭐</div>
-                    <div style="color: #94a3b8;">4.8/5 (24 reviews)</div>
+    <div class="main-content">
+        <div class="user-card">
+            <h2 class="user-name"><?= $name ?></h2>
+
+            <div class="skills-section">
+                <h3 class="skills-title">Skills Offered</h3>
+                <div class="skills-list">
+                    <?php foreach ($skills_offered as $skill): ?>
+                        <span style="display: inline-block; background: rgba(96, 165, 250, 0.2); color: #60a5fa; padding: 4px 12px; border-radius: 20px; margin: 2px; font-size: 14px;">
+                            <?= htmlspecialchars($skill) ?>
+                        </span>
+                    <?php endforeach; ?>
                 </div>
             </div>
 
-            <!-- Profile Section -->
-            <div class="profile-section">
-                <div class="profile-photo">
-                    Profile Photo
+            <div class="skills-section">
+                <h3 class="skills-title">Skills Wanted</h3>
+                <div class="skills-list">
+                    <?php foreach ($skills_wanted as $skill): ?>
+                        <span style="display: inline-block; background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 4px 12px; border-radius: 20px; margin: 2px; font-size: 14px;">
+                            <?= htmlspecialchars($skill) ?>
+                        </span>
+                    <?php endforeach; ?>
                 </div>
-                <button class="request-btn" onclick="openPopup()">Request</button>
+            </div>
+
+            <div class="rating-section">
+                <h3 class="rating-title">Rating and Feedback</h3>
+                <div style="font-size: 24px; margin: 10px 0;">⭐⭐⭐⭐⭐</div>
+                <div style="color: #94a3b8;">4.8/5 (24 reviews)</div>
             </div>
         </div>
+
+        <!-- Profile Section -->
+        <div class="profile-section">
+            <div class="profile-photo">
+                <img src="<?= $profile_pic ?>" alt="Profile Picture" style="width: 200px; height: 200px; border-radius: 50%; object-fit: cover;">
+            </div>
+            <button class="request-btn" onclick="openPopup()">Request</button>
+        </div>
     </div>
+
 
     <!-- Popup Overlay -->
     <div class="popup-overlay" id="popupOverlay" onclick="closePopup(event)">
@@ -415,22 +456,21 @@
             
             <div class="form-group">
                 <label class="form-label">Choose one of your offered skills</label>
-                <select class="form-select">
+                <select class="form-select" name="my_skill">
                     <option value="">Select a skill...</option>
-                    <option value="javascript">JavaScript</option>
-                    <option value="react">React</option>
-                    <option value="nodejs">Node.js</option>
-                    <option value="python">Python</option>
+                    <?php foreach ($my_skills as $skill): ?>
+                        <option value="<?= htmlspecialchars($skill) ?>"><?= htmlspecialchars($skill) ?></option>
+                    <?php endforeach; ?>
                 </select>
             </div>
-            
+
             <div class="form-group">
                 <label class="form-label">Choose one of their wanted skills</label>
-                <select class="form-select">
+                <select class="form-select" name="their_skill">
                     <option value="">Select a skill...</option>
-                    <option value="uiux">UI/UX Design</option>
-                    <option value="photoshop">Adobe Photoshop</option>
-                    <option value="figma">Figma</option>
+                    <?php foreach ($their_skills as $skill): ?>
+                        <option value="<?= htmlspecialchars($skill) ?>"><?= htmlspecialchars($skill) ?></option>
+                    <?php endforeach; ?>
                 </select>
             </div>
             

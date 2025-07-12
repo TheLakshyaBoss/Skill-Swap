@@ -271,14 +271,15 @@ if (isset($_SESSION["user_id"])) {
         <?php
 
             // Fetch only public profiles
-            $result = $conn->query("SELECT name, profile_pic, skills_offered, skills_wanted FROM users WHERE profile_visibility = 'public'");
+            $result = $conn->query("SELECT id, name, profile_pic, skills_offered, skills_wanted FROM users WHERE profile_visibility = 'public'");
 
             echo '<div class="profiles-grid" id="profilesGrid">';
 
             while ($row = $result->fetch_assoc()) {
                 $name = htmlspecialchars($row['name']);
                 $pic = $row['profile_pic'] ? htmlspecialchars($row['profile_pic']) : 'https://via.placeholder.com/100?text=User';
-                
+                $id = $row['id'];
+
                 $offered = array_filter(array_map('trim', explode(',', $row['skills_offered'])));
                 $wanted = array_filter(array_map('trim', explode(',', $row['skills_wanted'])));
 
@@ -311,12 +312,27 @@ if (isset($_SESSION["user_id"])) {
                 echo '</div>';
 
                 echo    '</div>';
-
-                echo    '<div class="profile-actions">';
-                echo        '<button class="request-btn" onclick="sendRequest(\'' . $name . '\')">Request</button>';
-                echo        '<div class="rating">rating: ' . $rating . '/5</div>';
-                echo    '</div>';
-                echo '</div>';
+                
+                // request button will direct to log-in page if not logged in
+                if ($log) {
+                    echo    '<div class="profile-actions">';
+                    echo        '<form method="get" action="app/browse-profile.php">';    
+                    echo            '<input value='. $id .' type="hidden" name="id">';
+                    echo            '<button class="request-btn" onclick="">Request</button>';
+                    echo        '</form>';
+                    echo        '<div class="rating">Rating: ' . $rating . '/5</div>';
+                    echo    '</div>';
+                    echo '</div>'; 
+                } else {
+                    echo    '<div class="profile-actions">';
+                    echo        '<form method="get" action="app/login.php">';    
+                    echo            '<input value='. $id .' type="hidden" name="id">';
+                    echo            '<button class="request-btn" onclick="">Request</button>';
+                    echo        '</form>';
+                    echo        '<div class="rating">Rating: ' . $rating . '/5</div>';
+                    echo    '</div>';
+                    echo '</div>';
+                }
             }
 
             echo '</div>';
