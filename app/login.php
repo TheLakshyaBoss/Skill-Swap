@@ -16,8 +16,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->fetch();
         if (password_verify($pass, $hash)) {
             $_SESSION["email"] = $email;
-            header("Location: home.php");
-            
+            header("Location: ../index.php");
+
             $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
             $stmt->bind_param("s", $email);
             $stmt->execute();
