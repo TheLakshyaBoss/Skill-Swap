@@ -1,4 +1,5 @@
 <?php
+session_start();
 include "db.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -21,16 +22,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       }
   }
 
+  
   $stmt = $conn->prepare("INSERT INTO users (name, email, password, profile_pic, skills_offered, skills_wanted, availability, location, profile_visibility) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
   $stmt->bind_param("sssssssss", $name, $email, $password, $pic, $skills_offered, $skills_wanted, $availability, $location, $visibility);
-  $stmt->execute();
-    
+  if ($stmt->execute()) {
+      $_SESSION['user_id'] = $stmt->insert_id; // ✅ Get the newly inserted user's ID
+      echo "<script>alert('Signup successful!'); window.location='../dashboard.php';</script>";
+  } else {
+      echo "<script>alert('Signup failed: " . $stmt->error . "');</script>";
+  }
+
   $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
   $stmt->bind_param("s", $email);
   $stmt->execute();
-  $stmt->bind_result($user_id);
-  if ($stmt->fetch()) {
-      $_SESSION['user_id'] = $user_id;
+  $result = $stmt->get_result();
+  if ($row = $result->fetch_assoc()) {
+    $_SESSION['user_id'] = $row['id'];
   }
 
   echo "<script>alert('Signup successful!'); window.location='../index.php';</script>";

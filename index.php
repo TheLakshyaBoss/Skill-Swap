@@ -2,10 +2,11 @@
 include "app/db.php";
 session_start();
 
-$logged_in = false;
+$log = False;
 if (isset($_SESSION["user_id"])) {
-    $logged_in = true;    
+    $log = True;
 }
+// echo $logged_in;
 
 ?>
 
@@ -132,8 +133,8 @@ if (isset($_SESSION["user_id"])) {
         }
 
         .profile-photo {
-            width: 80px;
-            height: 80px;
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
             background-color: #444;
             display: flex;
@@ -156,6 +157,8 @@ if (isset($_SESSION["user_id"])) {
 
         .skills-section {
             margin-bottom: 10px;
+            display: flex;
+            gap: 20px;
         }
 
         .skills-label {
@@ -249,7 +252,7 @@ if (isset($_SESSION["user_id"])) {
         <header>
             <div class="logo">Skill Swap Platform</div>
             
-            <?php if (!$logged_in) { ?>
+            <?php if (!$log) { ?>
                 <button class="login-btn" onclick="location.href='app/login.php'"> Login</button>
             <?php } ?>
         </header>
@@ -307,7 +310,7 @@ if (isset($_SESSION["user_id"])) {
                 echo     '</div>';
                 echo '</div>';
 
-                echo    '</div>'; // .profile-info
+                echo    '</div>';
 
                 echo    '<div class="profile-actions">';
                 echo        '<button class="request-btn" onclick="sendRequest(\'' . $name . '\')">Request</button>';
