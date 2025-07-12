@@ -1,3 +1,12 @@
+<?php 
+
+$url = "app/login.php";
+if (isset($_SESSION["user_id"])) {
+    $url = "";
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,7 +19,7 @@
 </head>
 <body>
     <div class="container">
-        
+
         <?php include "app/header.php" ; ?>
 
         <div class="search-section">
