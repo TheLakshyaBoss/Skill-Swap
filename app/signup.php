@@ -24,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $stmt->bind_param("sssssssss", $name, $email, $password, $pic, $skills_offered, $skills_wanted, $availability, $location, $visibility);
   $stmt->execute();
 
-  echo "<script>alert('Signup successful!'); window.location='login.php';</script>";
+  echo "<script>alert('Signup successful!'); window.location='../index.php';</script>";
 }
 ?>
 
@@ -34,10 +34,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   <meta charset="UTF-8">
   <title>Create an Account</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Parkinsans:wght@300..800&display=swap');
 
 * {
   box-sizing: border-box;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: "Parkinsans", sans-serif;
 }
 
 body {
@@ -150,6 +151,7 @@ button:hover {
 
 .profile-pic-box {
   text-align: center;
+  justify-content: center;
 }
 
 .profile-pic-box img {
@@ -171,6 +173,14 @@ button:hover {
   text-align: center;
   display: block;
   margin: 0 auto;
+}
+
+a {
+    color: #58a6ff;
+    text-decoration: none;
+    display: block;
+    margin-top: 10px;
+    text-align: center;
 }
 
 @media(max-width: 650px) {
@@ -202,7 +212,7 @@ button:hover {
 
   <div class="profile-pic-wrapper">
     <div class="profile-pic-box">
-      <img id="preview" src="https://via.placeholder.com/120?text=+" alt="Profile Picture">
+      <img id="preview" src="https://i.pinimg.com/474x/4c/dc/c9/4cdcc9e8902048b9e0db0b0f6298eeb9.jpg" alt="Profile Picture">
       <input type="file" name="profile_pic" accept="image/*" onchange="loadFile(event)">
     </div>
   </div>
@@ -251,7 +261,10 @@ button:hover {
     </select>
 
     <button type="submit">Sign Up</button>
-</form>
+
+    <a href="login.php">Already have an account? Login</a>
+
+  </form>
 
   <script>
     const loadFile = event => {
