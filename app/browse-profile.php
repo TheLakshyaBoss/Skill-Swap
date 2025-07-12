@@ -453,36 +453,39 @@ $stmt->close();
     <div class="popup-overlay" id="popupOverlay" onclick="closePopup(event)">
         <div class="popup" onclick="event.stopPropagation()">
             <h2 class="popup-title">Choose one of your offered skills</h2>
-            
-            <div class="form-group">
-                <label class="form-label">Choose one of your offered skills</label>
-                <select class="form-select" name="my_skill">
-                    <option value="">Select a skill...</option>
-                    <?php foreach ($my_skills as $skill): ?>
-                        <option value="<?= htmlspecialchars($skill) ?>"><?= htmlspecialchars($skill) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
+    
+            <form method="post" action="request.php">
+                <input type="hidden" name="to_user_id" value="<?php echo $id; ?>">
+                <div class="form-group">
+                    <label class="form-label">Choose one of your offered skills</label>
+                    <select class="form-select" name="my_skill">
+                        <option value="">Select a skill...</option>
+                        <?php foreach ($my_skills as $skill): ?>
+                            <option value="<?= htmlspecialchars($skill) ?>"><?= htmlspecialchars($skill) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label class="form-label">Choose one of their wanted skills</label>
-                <select class="form-select" name="their_skill">
-                    <option value="">Select a skill...</option>
-                    <?php foreach ($their_skills as $skill): ?>
-                        <option value="<?= htmlspecialchars($skill) ?>"><?= htmlspecialchars($skill) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Message</label>
-                <textarea class="form-textarea" placeholder="Write your message here..."></textarea>
-            </div>
-            
-            <div class="popup-buttons">
-                <button class="btn-cancel" onclick="closePopup()">Cancel</button>
-                <button class="btn-submit" onclick="submitRequest()">Submit</button>
-            </div>
+                <div class="form-group">
+                    <label class="form-label">Choose one of their wanted skills</label>
+                    <select class="form-select" name="their_skill">
+                        <option value="">Select a skill...</option>
+                        <?php foreach ($their_skills as $skill): ?>
+                            <option value="<?= htmlspecialchars($skill) ?>"><?= htmlspecialchars($skill) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Message</label>
+                    <textarea class="form-textarea" placeholder="Write your message here..." name="message"></textarea>
+                </div>
+                
+                <div class="popup-buttons">
+                    <button class="btn-cancel" onclick="closePopup()">Cancel</button>
+                    <button type="submit" class="btn-submit">Submit</button>
+                </div>
+            </form>
         </div>
     </div>
 

@@ -4,9 +4,23 @@ session_start();
 
 $log = False;
 if (isset($_SESSION["user_id"])) {
+    
+    $user_id = $_SESSION["user_id"];
+    $sql = "SELECT profile_pic FROM users WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $pfp = $row['profile_pic'];
+    } else {
+        echo "User not found.";
+    }
+ 
     $log = True;
 }
-// echo $logged_in;
 
 ?>
 
@@ -254,6 +268,8 @@ if (isset($_SESSION["user_id"])) {
             
             <?php if (!$log) { ?>
                 <button class="login-btn" onclick="location.href='app/login.php'"> Login</button>
+            <?php } else { ?>
+                <div class="profile-photo"><img src="<?php echo $pfp; ?>" style="width:100%; border-radius: 8px;"></div>
             <?php } ?>
         </header>
 
